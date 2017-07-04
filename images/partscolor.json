@@ -1,0 +1,108 @@
+{"frames": [
+
+{
+	"filename": "bluehair.png",
+	"frame": {"x":91,"y":433,"w":118,"h":117},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":118,"h":117},
+	"sourceSize": {"w":118,"h":117}
+},
+{
+	"filename": "body.png",
+	"frame": {"x":1,"y":1,"w":214,"h":322},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":214,"h":322},
+	"sourceSize": {"w":214,"h":322}
+},
+{
+	"filename": "clothes.png",
+	"frame": {"x":348,"y":451,"w":94,"h":95},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":94,"h":95},
+	"sourceSize": {"w":94,"h":95}
+},
+{
+	"filename": "cyanhair.png",
+	"frame": {"x":217,"y":258,"w":129,"h":238},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":129,"h":238},
+	"sourceSize": {"w":129,"h":238}
+},
+{
+	"filename": "darkbluehair.png",
+	"frame": {"x":348,"y":258,"w":139,"h":110},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":139,"h":110},
+	"sourceSize": {"w":139,"h":110}
+},
+{
+	"filename": "eyes.png",
+	"frame": {"x":424,"y":144,"w":54,"h":55},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":54,"h":55},
+	"sourceSize": {"w":54,"h":55}
+},
+{
+	"filename": "face.png",
+	"frame": {"x":217,"y":144,"w":205,"h":112},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":205,"h":112},
+	"sourceSize": {"w":205,"h":112}
+},
+{
+	"filename": "greenhair.png",
+	"frame": {"x":1,"y":325,"w":148,"h":106},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":148,"h":106},
+	"sourceSize": {"w":148,"h":106}
+},
+{
+	"filename": "nose.png",
+	"frame": {"x":440,"y":1,"w":41,"h":43},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":41,"h":43},
+	"sourceSize": {"w":41,"h":43}
+},
+{
+	"filename": "palette.png",
+	"frame": {"x":348,"y":370,"w":134,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":134,"h":79},
+	"sourceSize": {"w":134,"h":79}
+},
+{
+	"filename": "purplehair.png",
+	"frame": {"x":217,"y":1,"w":221,"h":141},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":221,"h":141},
+	"sourceSize": {"w":221,"h":141}
+},
+{
+	"filename": "redhair.png",
+	"frame": {"x":1,"y":433,"w":88,"h":125},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":88,"h":125},
+	"sourceSize": {"w":88,"h":125}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "partscolor.png",
+	"format": "RGBA8888",
+	"size": {"w":488,"h":559},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:951cf23dc799139b244d94d07e3c40c9:637ee57567720156e48e2f196d40917e:994cbf2f3ef4532feadf2069893e3fdf$"
+}
+}

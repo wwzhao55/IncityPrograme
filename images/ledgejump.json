@@ -1,0 +1,44 @@
+{"frames": [
+
+{
+	"filename": "ledge1jump.png",
+	"frame": {"x":284,"y":68,"w":179,"h":65},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":179,"h":65},
+	"sourceSize": {"w":179,"h":65}
+},
+{
+	"filename": "ledge2jump.png",
+	"frame": {"x":284,"y":1,"w":268,"h":65},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":268,"h":65},
+	"sourceSize": {"w":268,"h":65}
+},
+{
+	"filename": "ledge3jump.png",
+	"frame": {"x":1,"y":1,"w":281,"h":135},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":281,"h":135},
+	"sourceSize": {"w":281,"h":135}
+},
+{
+	"filename": "ledge4jump.png",
+	"frame": {"x":1,"y":138,"w":356,"h":99},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":356,"h":99},
+	"sourceSize": {"w":356,"h":99}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "ledgejump.png",
+	"format": "RGBA8888",
+	"size": {"w":553,"h":238},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:347faae88542fedb808ca6ce371d111a:900d14021ed1d2111ea7925bd3ced6c3:91dccec251dcc2a9963bfb152c62b974$"
+}
+}

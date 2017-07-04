@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>魔发精灵 欢动四城</title>
+	<meta name="viewport" content="width=750,inital-scale=1.0,maximum-scale=2.0,user-scalable=yes;">
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+	<script src="//cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+	<style>
+		html,body{
+			height:100%;
+			padding: 0;
+			margin:0;
+		}
+		.receive_pic{
+			background-image: url('images/receive/bg_wish.jpg');
+			background-size: cover;
+			width:100%;
+			height:100%;
+		}
+		.receive_touch{
+			background-image: url(images/receive/icon_wish.png);
+		    width: 202px;
+		    height: 62px;
+		    position: absolute;
+		    bottom: 146px;
+		    left: 274px;	
+		}
+		#record{
+	        background: url(images/share/bg.jpg);
+	        background-size: cover;
+	        text-align: center;
+	        width: 100%;
+	        height: 100%;
+	        position: relative;
+	        display: none;
+	    }
+	    #sprite{
+	        position: absolute;
+	        top: 190px;
+	        left: 146px;
+	        z-index: 5;
+	    }
+		#recorder{
+	        width: 653px;
+	        height:544px;
+	        position: absolute;
+	        top: 595px;
+	        left: 48px;
+	        z-index: 10;
+	    }
+	    #recorder img{
+	        width: 100%;
+	        height: 100%;
+	    }
+		.record-btn{
+			width:152px;
+			height:62px;
+			border: none;
+		    padding: 0;
+		    background-color: transparent;
+		}
+		.record-btn:not(:first-child){
+			margin-left: 30px;
+		}
+		#play{
+			background-image: url('images/receive/icon_1.png');
+		}
+		#play:disabled{
+			background-image: url('images/receive/icon_1_hover.png');
+		}
+		#stop{
+			background-image: url('images/receive/icon_2.png');
+		}
+		#stop:disabled{
+			background-image: url('images/receive/icon_2_hover.png');
+		}
+		#redirect{
+			display: inline-block;
+			background-image: url('images/receive/icon_3.png');
+		}
+		#redirect:hover{
+			background-image: url('images/receive/icon_3_hover.png');
+		}
+		#btn_group{
+	        position: absolute;
+	        width: 100%;
+	        height: 100px;
+	        top: 1010px;
+	        left: 0px;
+	        z-index: 10;
+	    }
+/*		#left{
+	        position: absolute;
+	        top: 723px;
+	        left: 211px;
+	    }*/
+	    #left_outer{
+	        position: absolute;
+	        top: 643px;
+	        left: 130px;
+	    }
+/*	    #right{
+	        position: absolute;
+	        top: 723px;
+	        left: 451.5px;
+	    }*/
+	    #right_outer{
+	        position: absolute;
+	        top: 692px;
+	        left: 421px;
+	    }
+	    #label{
+	        position: absolute;
+	        top: 713px;
+	        left: 360px;
+	        z-index: 8;
+	    }
+	    #mid{
+	        position: absolute;
+	        top: 823px;
+	        left: 250px;
+	        z-index: 8;
+	    }
+	    #top{
+	        position: absolute;
+	        top: 705px;
+	        left: 250px;
+	        z-index: 8;
+	    }
+	</style>
+</head>
+<body>
+   <div class='receive_pic'>
+   		<div class='receive_touch'></div>
+   </div>
+   <div id="record">
+	    <img src="images/share/jl.png" id="sprite">
+	    <div id="recorder">
+	        <img src="images/share/outer.png">
+	    </div>
+	    <img src="images/share/label.png" id="label">
+<!-- 	    <img src="images/share/left.png" id="left"  class="rotate">
+	    <img src="images/share/left.png" id="right" class="rotate"> -->
+	    <img src="images/share/mid.png" id="mid">
+	    <img src="images/share/mid.png" id="top">
+	    <img src="images/share/left_outer.png" id="left_outer"  class="rotate">
+	    <img src="images/share/right_outer.png" id="right_outer"  class="rotate">
+	    <div id="btn_group">
+	        <button id='play' class='record-btn'></button>
+	        <button id='stop' class='record-btn'></button>
+	        <a id='redirect' class='record-btn'></a>
+	    </div>
+	</div>
+<script type="text/javascript">
+    var nowurl= document.URL;
+    //获取参数
+    var GetQueryString = function(name) {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null) return decodeURIComponent(r[2]);
+        };
+    var serverId = GetQueryString("serverId");
+    var source= GetQueryString("source");//原录音的openid
+    var openid= GetQueryString("openid");
+    var localId;
+    var rotate_time = 0;
+    var role;
+    $('#redirect').click(function(){
+    	window.location.href='http://incity.dataguiding.com?source='+source;
+    })
+    $.ajax({
+        url: "/weixin/getJssdk.php",
+        type: "POST",
+        data:{url:nowurl},
+        dataType: "json",
+        success: function (res, xml) {
+            var data = res.signature;
+            wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: data.appId, // 必填，公众号的唯一标识
+                timestamp: data.timestamp, // 必填，生成签名的时间戳
+                nonceStr: data.nonceStr, // 必填，生成签名的随机串
+                signature: data.signature,// 必填，签名，见附录1
+                jsApiList: ['getLocation','playVoice','stopVoice','onMenuShareTimeline','onMenuShareAppMessage','downloadVoice']
+            });
+          
+            wx.ready(function(){
+            	  wx.getLocation({
+                        type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                        success: function (res) {
+                            var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                            var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                            $.ajax({
+                                url:'/weixin/record.php',
+                                data:{
+                                    latitude:latitude,
+                                    longitude:longitude,
+                                    openid:openid,
+                                    source:source,
+                                    game:0,
+                                    page:4
+                                },
+                                type:'post',
+                                dataType:'json',
+                                success:function(result){
+                                    if(result.status=='success'){
+
+                                    }else{
+                                        //alert('记录失败');
+                                    }
+                                }
+                            });
+                        }
+                    });
+	              wx.onMenuShareAppMessage({
+	                title: '魔发精灵 欢动四城', // 分享标题
+                    desc: '您有一条新的语音祝福  @天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享描述
+	                link: "http://incity.dataguiding.com?serverId="+serverId+'&source='+source, // 分享链接
+	                imgUrl: 'http://incity.dataguiding.com/images/share2.png', // 分享图标
+	                type: '', // 分享类型,music、video或link，不填默认为link
+	                dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+	                success: function (result) {
+	                    //window.location.href='http://incity.dataguiding.com?source='+source;
+	                },
+	                cancel: function (result) {
+	                    // 用户取消分享后执行的回调函数
+	                }
+	            });
+	            wx.onMenuShareTimeline({
+	                title: '魔发精灵 欢动四城！您有一条新的语音祝福  @天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享标题
+	                link: "http://incity.dataguiding.com?serverId="+serverId+'&source='+source, // 分享链接
+	                imgUrl: 'http://incity.dataguiding.com/images/share2.png', // 分享图标
+	                success: function (result) {
+	                    //window.location.href='http://incity.dataguiding.com?source='+source;
+	                },
+	                cancel: function (result) {
+	                    // 用户取消分享后执行的回调函数
+	                }
+	            });
+	            $('#play').click(function(){
+	            	$('#play').attr('disabled','disabled');
+	            	if(!localId){
+	            		wx.downloadVoice({
+						    serverId: serverId, // 需要下载的音频的服务器端ID，由uploadVoice接口获得
+						    isShowProgressTips: 1, // 默认为1，显示进度提示
+						    success: function (res) {
+						        localId = res.localId; // 返回音频的本地ID
+						        wx.playVoice({
+								    localId: localId // 需要播放的音频的本地ID，由stopRecord接口获得
+								});
+								role = setInterval(function(){
+				                    rotate_time=rotate_time+1;
+				                    $('.rotate').css('transform','rotate('+rotate_time+'deg)')
+				                },20);	
+						    }
+						});
+	            	}else{
+	            		wx.playVoice({
+						    localId: localId // 需要播放的音频的本地ID，由stopRecord接口获得
+						});
+						role = setInterval(function(){
+		                    rotate_time=rotate_time+1;
+		                    $('.rotate').css('transform','rotate('+rotate_time+'deg)')
+		                },20);
+	            	}
+	            	wx.onVoicePlayEnd({
+					    success: function (res) {
+					        //var localId = res.localId; // 返回音频的本地ID
+					        $('#play').attr('disabled',false);
+					        clearInterval(role);
+					    }
+					});
+	            });
+	            $('#stop').click(function(){
+	            	$('#play').attr('disabled',false);
+	            	wx.stopVoice({
+					    localId: localId // 需要停止的音频的本地ID，由stopRecord接口获得
+					});
+					clearInterval(role);
+	            })
+            })
+
+            
+        },
+        fail: function (status) {
+            alert('微信配置信息获取失败');
+        }
+    });
+    $('.receive_touch').on('click',function(){
+    	$('.receive_pic').hide();
+    	$('#record').show();
+    })
+    
+</script>
+</body>
+</html>

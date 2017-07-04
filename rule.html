@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>魔发精灵 欢动四城</title>
+	<meta name="viewport" content="width=750,inital-scale=1.0,maximum-scale=2.0,user-scalable=yes;">
+	<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+	<script src="//cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+</head>
+<body>
+   <div id="rule">
+	   <div id='video'>
+	   		<video controls="controls" preload="auto" height='220' width='350' preload='auto'>
+			  <source src="images/video.mp4" type="video/mp4" />
+			</video>	
+	   	</div>
+       <div id="rule_btn_group">
+   	     <button class="rule_btn" id="rule_back" onclick="ruleback()"></button>
+       </div>
+   </div>
+</body>
+<script type="text/javascript">
+    var nowurl= document.URL;
+    var GetQueryString = function(name) {
+        var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if(r!=null) return decodeURIComponent(r[2]);
+    };
+    var openid = GetQueryString("openid");
+    var source = GetQueryString("source");
+    $.ajax({
+	    url: "/weixin/getJssdk.php",   
+	    type: "POST", 
+	    data:{url:nowurl},        
+	    dataType: "json",
+	    success: function (res, xml) {
+	                var data = res.signature;
+	                wx.config({
+	                    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+	                    appId: data.appId, // 必填，公众号的唯一标识
+	                    timestamp: data.timestamp, // 必填，生成签名的时间戳
+	                    nonceStr: data.nonceStr, // 必填，生成签名的随机串
+	                    signature: data.signature,// 必填，签名，见附录1
+	                    jsApiList: ['onMenuShareTimeline','onMenuShareAppMessage','getLocation']
+	                });
+	                var url = "http://incity.dataguiding.com?source="+openid;
+	                wx.ready(function(){
+	                	wx.getLocation({
+                            type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                            success: function (res) {
+                                var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                                var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                                $.ajax({
+                                    url:'/weixin/record.php',
+                                    data:{
+                                        latitude:latitude,
+                                        longitude:longitude,
+                                        openid:openid,
+                                        source:source,
+                                        game:0,
+                                        page:3
+                                    },
+                                    type:'post',
+                                    dataType:'json',
+                                    success:function(result){
+                                        if(result.status=='success'){
+
+                                        }else{
+                                            //alert('记录失败');
+                                        }
+                                    }
+                                });
+                            }
+                        });
+	                	wx.onMenuShareAppMessage({
+		                    title: '魔发精灵 欢动四城', // 分享标题
+                    		desc: '这是一个彩色的trolls圣诞季@天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享描述
+		                    link: url, // 分享链接
+		                    imgUrl: 'http://incity.dataguiding.com/images/share1.jpg', // 分享图标
+		                    type: '', // 分享类型,music、video或link，不填默认为link
+		                    dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+		                    success: function (result) { 
+		                       // window.location.href='game.html';
+		                    },
+		                    cancel: function (result) { 
+		                        // 用户取消分享后执行的回调函数
+		                    }
+		                });
+		                wx.onMenuShareTimeline({
+		                    title: '魔发精灵 欢动四城！这是一个彩色的trolls圣诞季@天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享标题
+		                    link: url, // 分享链接
+		                    imgUrl: 'http://incity.dataguiding.com/images/share1.jpg', // 分享图标
+		                    success: function (result) { 
+		                        //window.location.href='game.html';
+		                    },
+		                    cancel: function (result) { 
+		                        // 用户取消分享后执行的回调函数
+		                    }
+		                });
+	                })      
+	             }
+    });
+	function ruleback(){
+      window.location.href='http://incity.dataguiding.com?source='+source;
+    }
+    function rulesend(){
+      $('#rule_pic').show();
+    }
+    function cancelMask(){
+    	$('#rule_pic').hide();
+    }
+</script>
+<style type="text/css">
+html,body{
+	margin:0;
+	padding:0;
+}
+	#rule{ 
+		width: 750px;
+		height: 1488px;
+		background: url(images/rule/bg.jpg);
+		position: relative; 
+	}
+	#rule_btn_group{
+		text-align: center;
+	}
+	.rule_btn{
+		width: 256px;
+		height: 90px;
+		border:none;
+		outline: none;
+		border-radius: 5px;
+	}
+	#rule_btn_group{
+		width: 100%;
+		height: 90px;
+		position: absolute;
+		bottom: 90px;
+		padding: 0 30px;
+    	box-sizing: border-box;
+	}
+	#rule_back{
+		background: url(images/rule/back.png); 
+	}
+	#rule_send{
+		background: url(images/rule/send.png); 
+	}
+	#rule_pic{
+	    width: 100%;
+	    height: 100%;
+	    position: fixed;
+	    top: 0px;
+	    left: 0px;
+	    z-index: 5;
+	    display: none;
+	}
+	#video{
+		position: absolute;
+		text-align: center;
+		width:100%;
+		top:510px;
+	}
+	video{
+		
+	}
+</style>
+<div style="display:none">
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1260943858'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1260943858' type='text/javascript'%3E%3C/script%3E"));</script>
+</div>
+</html>

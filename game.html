@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>魔发精灵 欢动四城</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <link rel="stylesheet" type="text/css" href="main.css" />
+    <script src="js/jquery-3.1.1.min.js"></script>
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="js/phaser.min.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body>
+<img id="music_btn" src="images/music_on.png" />
+<audio id="bg_audio" style="display: none;" autoplay="autoplay" loop="loop">
+    <source src="images/bgmusic.mp3"/>
+</audio>
+<img id="video_btn" src="images/video.png" />
+<div id="yl_logo"><img src="images/logo@2x.png" ></div>
+<img src="images/loading.gif" id="loading" />
+<img src="images/guide.png" id="guide" />
+<img src="images/maskjump.jpg" id="game1" />
+<img src="images/maskcolor.jpg" id="game2" />
+<img src="images/maskshare.jpg" id="game3" />
+<img src="images/maskmusic.jpg" id="game4" />
+<div id="game"></div>
+<script src="tour.js"></script>
+<script type="text/javascript">
+</script>
+<div id="pano" style="width:100%;height:100%;">
+    <noscript><table style="width:100%;height:100%;"><tr style="vertical-align:middle;"><td><div style="text-align:center;">ERROR:<br/><br/>Javascript not activated<br/><br/></div></td></tr></table></noscript>
+    <script>
+        // Custom JS
+        var load1 = false, load2 = false, load3 = false;
+        setTimeout(function () {
+            load3 = true;
+            hideLoading();
+        }, 3000);
+        embedpano({swf:"tour.swf", xml:"tour.xml", target:"pano", html5:"prefer", mobilescale:1.0, passQueryParameters:true});
+
+        /**
+         * @return {String}
+         */
+        var GetQueryString = function(name) {
+            var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if(r!=null) return decodeURIComponent(r[2]);
+        };
+        //获取参数
+        var openid = GetQueryString("openid");
+        var source = GetQueryString("source");
+        //share部分
+        $.ajax({
+            type:'post',
+            url:'/weixin/getJssdk.php',
+            data:{url:document.URL},
+            dataType:'json',
+            success:function(result){
+                if(result.status=='success'){
+                    console.log(result.signature);
+                    var data = result.signature;
+                    wx.config({
+                        debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                        appId: data.appId, // 必填，公众号的唯一标识
+                        timestamp: data.timestamp, // 必填，生成签名的时间戳
+                        nonceStr: data.nonceStr, // 必填，生成签名的随机串
+                        signature: data.signature,// 必填，签名，见附录1
+                        jsApiList: ['getLocation','onMenuShareAppMessage','onMenuShareTimeline']
+                    });
+                    wx.ready(function(){
+                        wx.getLocation({
+                            type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                            success: function (res) {
+                                var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                                var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                                var city, distance = 9999, pos=[
+                                    // 天津：39.0849967352,117.1994308610
+                                    {x: 39.0849967352, y: 117.1994308610},
+                                    // 南京：32.0583632758,118.7964469824
+                                    {x: 32.0583632758, y: 118.7964469824},
+                                    // 常熟：31.2136577113,121.4501377309
+                                    {x: 31.2136577113, y: 121.4501377309},
+                                    // 宁波：29.8738308777,121.5502788281
+                                    {x: 29.8738308777, y: 121.5502788281}
+                                ];
+                                function calcDistance(x1, y1, x2, y2) {
+                                    return Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
+                                }
+                                function krpano()
+                                {
+                                    return document.getElementById("krpanoSWFObject");
+                                }
+                                function lookto(toh, tov, fov)
+                                {
+                                    krpano().call( "lookto(" + toh +"," + tov + "," + fov + ")" );
+                                }
+                                for (var i = 0; i < pos.length; i++) {
+                                    var dis = calcDistance(latitude, longitude, pos[i].x, pos[i].y);
+                                    if (dis < distance) {
+                                        distance = dis;
+                                        city = i;
+                                    }
+                                }
+                                switch (city) {
+                                    case 0:
+                                        lookto(-77.596, -10.027, 120.0);
+                                        break;
+                                    case 1:
+                                        lookto(26.918, -19.921, 120.0);
+                                        break;
+                                    case 2:
+                                        lookto(162.543, -1.342, 120.0);
+                                        break;
+                                    case 3:
+                                        lookto(26.918, -19.921, 120.0);
+                                }
+                                $.ajax({
+                                    url:'/weixin/record.php',
+                                    data:{
+                                        latitude:latitude,
+                                        longitude:longitude,
+                                        openid:openid,
+                                        source:source,
+                                        game:0,
+                                        page:1
+                                    },
+                                    type:'post',
+                                    dataType:'json',
+                                    success:function(result){
+                                        if(result.status=='success'){
+
+                                        }else{
+                                            //alert('记录失败');
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                        wx.onMenuShareAppMessage({
+                            title: '魔发精灵 欢动四城', // 分享标题
+                            desc: '这是一个彩色的trolls圣诞季@天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享描述
+                            link: 'http://incity.dataguiding.com?source='+openid, // 分享链接
+                            imgUrl: 'http://incity.dataguiding.com/images/share1.jpg', // 分享图标
+                            type: '', // 分享类型,music、video或link，不填默认为link
+                            dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+                            success: function () {
+                                //window.location.href='rule.html';
+                            },
+                            cancel: function () {
+                                // 用户取消分享后执行的回调函数
+                            }
+                        });
+                        wx.onMenuShareTimeline({
+                            title: '魔发精灵 欢动四城！这是一个彩色的trolls圣诞季@天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享标题
+                            link: 'http://incity.dataguiding.com?source='+openid, // 分享链接
+                            imgUrl: 'http://incity.dataguiding.com/images/share1.jpg', // 分享图标
+                            success: function () {
+                                //window.location.href='rule.html';
+                            },
+                            cancel: function () {
+                                // 用户取消分享后执行的回调函数
+                            }
+                        });
+                    });
+                    
+                }
+            }
+        });
+    </script>
+</div>
+
+<div style="display:none">
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1260943858'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1260943858' type='text/javascript'%3E%3C/script%3E"));</script>
+</div>
+</body>
+</html>

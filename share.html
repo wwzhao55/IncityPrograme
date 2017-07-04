@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html style="height: 100%;">
+<head>
+    <title>魔发精灵 欢动四城</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=750,inital-scale=1.0,maximum-scale=2.0,user-scalable=yes;">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+    <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+    <script src="js/jquery-3.1.1.min.js"></script>
+</head>
+<body style="width: 750px;height: 100%;margin: 0px;">
+<div id="record">
+    <img src="images/share/jl.png" id="sprite">
+    <div id="recorder">
+        <img src="images/share/outer.png" id="outer">
+    </div>
+    <img src="images/share/label.png" id="label">
+<!--     <img src="images/share/left.png" id="left"  class="rotate">
+    <img src="images/share/left.png" id="right" class="rotate"> -->
+    <img src="images/share/mid.png" id="mid">
+    <img src="images/share/mid.png" id="top">
+    <img src="images/share/left_outer.png" id="left_outer"  class="rotate">
+    <img src="images/share/right_outer.png" id="right_outer"  class="rotate">
+    <div id="btn_group">
+        <button id="voice" class="btn">&nbsp;</button>
+        <button id="play" class="btn">&nbsp;</button>
+        <button id="re_voice" class="btn">&nbsp;</button>
+        <button id="send" class="btn">&nbsp;</button>
+    </div>
+</div>
+<img src="images/mask.png" id="share_pic">
+<script type="text/javascript">
+    var timer;
+    var voiceId;
+    var nowurl= document.URL;
+    var url_arr = window.location.hash.substr(1).split('&');
+    var starttime=parseInt(url_arr[0]);
+    if (starttime !== 15 && starttime !== 10) starttime = 7;
+    var time = parseInt(window.location.hash.substr(1));
+    if (time !== 15 && time !== 10) time = 7;
+    var openid = url_arr[1];
+    var source  = url_arr[2];
+    //旋转
+    var rotate_time = 0;
+    var role;
+    $.ajax({
+        url: "/weixin/getJssdk.php",
+        type: "POST",
+        data:{url:nowurl},
+        dataType: "json",
+        success: function (res, xml) {
+            var link = 'http://incity.dataguiding.com?source='+openid;
+            var title= '魔发精灵 欢动四城'; // 分享标题
+            var desc= '这是一个彩色的trolls圣诞季@天津印象城&宁波印象城&南京印象汇&常熟印象城'; // 分享描述
+            var data = res.signature;
+            wx.config({
+                debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+                appId: data.appId, // 必填，公众号的唯一标识
+                timestamp: data.timestamp, // 必填，生成签名的时间戳
+                nonceStr: data.nonceStr, // 必填，生成签名的随机串
+                signature: data.signature,// 必填，签名，见附录1
+                jsApiList: ['getLocation','startRecord','stopRecord','playVoice','stopVoice','onMenuShareTimeline','onMenuShareAppMessage','uploadVoice']
+            });
+            $("#voice").click(function(){
+                $("#voice").attr('disabled',true);
+                time=starttime;
+                wx.startRecord();
+                $('#voice').css("background","url(images/share/blockpress.png)");
+                $('#voice').html(time);
+                role = setInterval(function(){
+                    rotate_time=rotate_time+1;
+                    $('.rotate').css('transform','rotate('+rotate_time+'deg)')
+                },20);
+                timer=setInterval(function(){
+                    if (time>1) {
+                        time=time-1;
+                        $('#voice').html(time);
+                    } else if (time==1) {
+                        $('#voice').css("background","url(images/share/voicenormal.png)");
+                        $('#voice').html('&nbsp;');
+                        $("#voice").attr('disabled',false);
+                        clearInterval(role);
+                        wx.stopRecord({
+                            success: function (res) {
+                                voiceId = res.localId;
+                            }
+                        });
+                        
+                    }
+                },1000);
+            });
+            $("#play").click(function(){
+                if (!voiceId) {
+                    alert('请先录音^-^');
+                }else{
+                    time=starttime;
+                    wx.playVoice({
+                        localId: voiceId // 需要播放的音频的本地ID，由stopRecord接口获得
+                    })
+                    $('#voice').css("background","url(images/share/blockpress.png)");
+                    role = setInterval(function(){
+                        rotate_time=rotate_time+1;
+                        $('.rotate').css('transform','rotate('+rotate_time+'deg)')
+                    },20);
+                    timer=setInterval(function(){
+                        if (time>1) {
+                            time=time-1;
+                            $('#play').html(time);
+                        } else if (time==1) {
+                            $('#play').css("background","url(images/share/record_normal.png)");
+                            $('#play').html('&nbsp;');
+                            $("#play").attr('disabled',false);
+                        }
+                    },1000);
+                }
+            });
+            $("#re_voice").click(function(){
+               // time=starttime;
+                clearInterval(timer);
+                voiceId='';
+                wx.stopRecord({
+                    success: function (res) {
+                        voiceId = res.localId;
+                    }
+                });
+                $('#voice').css("background","url(images/share/voicenormal.png)");
+                $('#voice').html('&nbsp;');
+                setTimeout(function(){
+                    $('#voice').trigger('click');
+                },500);
+                
+              //  wx.startRecord();
+                // $('#re_voice').css("background","url(images/share/blockpress.png)");
+                // var timer=setInterval(function(){
+                //     if (time>1) {
+                //         time=time-1;
+                //         $('#re_voice').html(time);
+                //     } else if (time==1) {
+                //         $('#re_voice').css("background","url(images/share/renormal.png)");
+                //         $('#re_voice').html('&nbsp;');
+                //         wx.stopRecord({
+                //             success: function (res) {
+                //                 voiceId = res.localId;
+                //             }
+                //         });
+                //         clearInterval(timer);
+                //     }
+                // },1000);
+            });
+            $("#send").click(function(){
+            	var serverId;
+                if(!voiceId){
+                    alert('请先录音^-^');
+                    return;
+                }
+            	wx.uploadVoice({
+				    localId: voiceId, // 需要上传的音频的本地ID，由stopRecord接口获得
+				    isShowProgressTips: 1, // 默认为1，显示进度提示
+				        success: function (res) {
+				        serverId = res.serverId; // 返回音频的服务器端ID
+                        if(serverId){
+                            $('#share_pic').show();
+                            link = 'http://incity.dataguiding.com?serverId='+serverId+'&source='+openid;
+                            desc = "您有一条新的语音祝福  @天津印象城&宁波印象城&南京印象汇&常熟印象城";
+                            wx.onMenuShareAppMessage({
+                                title: title, // 分享标题
+                                desc: desc, // 分享描述
+                                link: link, // 分享链接
+                                imgUrl: 'http://incity.dataguiding.com/images/share2.png', // 分享图标
+                                type: '', // 分享类型,music、video或link，不填默认为link
+                                dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+                                success: function (result) {
+                                    
+                                    window.location.href='rule.html?openid='+openid+'&source='+source;
+                                    
+                                },
+                                cancel: function (result) {
+                                    // 用户取消分享后执行的回调函数
+                                }
+                            });
+                            wx.onMenuShareTimeline({
+                                title: '魔发精灵 欢动四城！您有一条新的语音祝福  @天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享标题
+                                link: link, // 分享链接
+                                imgUrl: 'http://incity.dataguiding.com/images/share2.png', // 分享图标
+                                success: function (result) {
+                                   
+                                    window.location.href='rule.html?openid='+openid+'&source='+source;                      
+                                    
+                                },
+                                cancel: function (result) {
+                                    // 用户取消分享后执行的回调函数
+                                }
+                            });
+                        }
+                        
+				      //  window.location.href='rule.html?'+serverId;
+				    }
+				});
+            });
+            wx.ready(function(){
+              wx.getLocation({
+                type: 'wgs84', // 默认为wgs84的gps坐标，如果要返回直接给openLocation用的火星坐标，可传入'gcj02'
+                success: function (res) {
+                    var latitude = res.latitude; // 纬度，浮点数，范围为90 ~ -90
+                    var longitude = res.longitude; // 经度，浮点数，范围为180 ~ -180。
+                    $.ajax({
+                        url:'/weixin/record.php',
+                        data:{
+                            latitude:latitude,
+                            longitude:longitude,
+                            openid:openid,
+                            source:source,
+                            game:0,
+                            page:2
+                        },
+                        type:'post',
+                        dataType:'json',
+                        success:function(result){
+                            if(result.status=='success'){
+
+                            }else{
+                                //alert('记录失败');
+                            }
+                        }
+                    });
+                }
+            });
+              wx.onMenuShareAppMessage({
+                title: title, // 分享标题
+                desc: desc, // 分享描述
+                link: link, // 分享链接
+                imgUrl: 'http://incity.dataguiding.com/images/share1.jpg', // 分享图标
+                type: '', // 分享类型,music、video或link，不填默认为link
+                dataUrl: '', // 如果type是music或video，则要提供数据链接，默认为空
+                success: function (result) {
+                },
+                cancel: function (result) {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            wx.onMenuShareTimeline({
+                title: '魔发精灵 欢动四城！这是一个彩色的trolls圣诞季@天津印象城&宁波印象城&南京印象汇&常熟印象城', // 分享标题
+                link: link, // 分享链接
+                imgUrl: 'http://incity.dataguiding.com/images/share1.jpg', // 分享图标
+                success: function (result) {
+                   
+                },
+                cancel: function (result) {
+                    // 用户取消分享后执行的回调函数
+                }
+            });
+            })
+            
+        },
+        fail: function (status) {
+            alert('微信配置信息获取失败');
+        }
+    });
+    $('#share_pic').click(function(){
+        $(this).hide();
+    })
+</script>
+<style type="text/css">
+    #record{
+        background: url(images/share/bg.jpg);
+        background-size: cover;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        position: relative;
+    }
+    #sprite{
+        position: absolute;
+        top: 190px;
+        left: 146px;
+        z-index: 5;
+    }
+    #recorder{
+        width: 653px;
+        height:544px;
+        position: absolute;
+        top: 595px;
+        left: 48px;
+        z-index: 10;
+    }
+    #recorder #outer{
+        width: 100%;
+        height: 100%;
+    }
+/*    #left{
+        position: absolute;
+        top: 723px;
+        left: 211px;
+    }*/
+    #left_outer{
+        position: absolute;
+        top: 643px;
+        left: 130px;
+    }
+/*    #right{
+        position: absolute;
+        top: 723px;
+        left: 451.5px;
+    }*/
+    #right_outer{
+        position: absolute;
+        top: 692px;
+        left: 421px;
+    }
+    #label{
+        position: absolute;
+        top: 713px;
+        left: 360px;
+        z-index: 8;
+    }
+    #mid{
+        position: absolute;
+        top: 823px;
+        left: 250px;
+        z-index: 8;
+    }
+    #top{
+        position: absolute;
+        top: 705px;
+        left: 250px;
+        z-index: 8;
+    }
+    .btn{
+        width: 106px;
+        border:none;
+        height: 62px;
+        border-radius: 5px;
+        outline: none;
+        margin-left: 15px;
+        font-size: 28px;
+        color: #ff9100;
+        text-align: center;
+        background-size: cover;
+    }
+    #voice{
+        background:url(images/share/voicenormal.png);
+        color: #ff9100;
+    }
+    #re_voice{
+        background:url(images/share/renormal.png);
+        color: #ff9100;
+    }
+    #play{
+        background:url(images/share/record_normal.png);
+    }
+    #send{
+        background:url(images/share/sendnormal.png);
+    }
+    #btn_group{
+        position: absolute;
+        width: 100%;
+        height: 100px;
+        top: 1010px;
+        left: 0px;
+        z-index: 10;
+    }
+    #share_pic{
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        z-index: 5;
+        display: none;
+    }
+</style>
+<div style="display:none">
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1260943858'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1260943858' type='text/javascript'%3E%3C/script%3E"));</script>
+</div>
+</body>
+</html>
